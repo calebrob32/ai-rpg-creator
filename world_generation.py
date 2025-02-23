@@ -70,24 +70,30 @@ def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
     
     return world
 
-# Add NPCs to villages, ruins, and dungeons
+# Add NPCs with basic quests
 def add_npcs(world):
     size_x, size_y = world.shape
     npc_list = []
     dialogues = {
-        "Villager": ["Welcome to our village!", "The fields are bountiful this season.", "Have you visited the ruins nearby?"],
-        "Wanderer": ["These ruins hold many secrets...", "I travel from land to land, learning stories.", "Beware of the dungeons ahead."],
-        "Dungeon Guardian": ["Turn back now, or face your doom!", "Only the strong survive here.", "Have you come seeking treasure?"]
+        "Villager": ["Welcome to our village!", "Can you bring me some herbs?", "The fields are bountiful this season."],
+        "Wanderer": ["These ruins hold many secrets...", "I seek a lost artifact, can you help?", "Beware of the dungeons ahead."],
+        "Dungeon Guardian": ["Turn back now, or face your doom!", "Defeat the monster within, and you shall be rewarded.", "Only the strong survive here."]
+    }
+    
+    quests = {
+        "Villager": "Gather 5 healing herbs",
+        "Wanderer": "Find an ancient artifact in the ruins",
+        "Dungeon Guardian": "Defeat the dungeon monster"
     }
     
     for x in range(size_x):
         for y in range(size_y):
             if world[x, y] == 5:  # Village NPC
-                npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"])))
+                npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"]), quests["Villager"]))
             elif world[x, y] == 6:  # Ruins NPC
-                npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"])))
+                npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"]), quests["Wanderer"]))
             elif world[x, y] == 7:  # Dungeon NPC
-                npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"])))
+                npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"]), quests["Dungeon Guardian"]))
     
     return npc_list
 
@@ -107,13 +113,13 @@ def display_world(world, npcs):
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with NPCs")
+    plt.title("AI-Generated RPG World with NPC Quests")
     
-    # Mark NPC locations and display their dialogue
+    # Mark NPC locations and display their dialogue & quests
     for npc in npcs:
-        x, y, npc_type, dialogue = npc
+        x, y, npc_type, dialogue, quest = npc
         plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
-        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}'")
+        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest}")
     
     plt.show()
 
