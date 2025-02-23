@@ -74,15 +74,20 @@ def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
 def add_npcs(world):
     size_x, size_y = world.shape
     npc_list = []
+    dialogues = {
+        "Villager": ["Welcome to our village!", "The fields are bountiful this season.", "Have you visited the ruins nearby?"],
+        "Wanderer": ["These ruins hold many secrets...", "I travel from land to land, learning stories.", "Beware of the dungeons ahead."],
+        "Dungeon Guardian": ["Turn back now, or face your doom!", "Only the strong survive here.", "Have you come seeking treasure?"]
+    }
     
     for x in range(size_x):
         for y in range(size_y):
             if world[x, y] == 5:  # Village NPC
-                npc_list.append((x, y, "Villager"))
+                npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"])))
             elif world[x, y] == 6:  # Ruins NPC
-                npc_list.append((x, y, "Wanderer"))
+                npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"])))
             elif world[x, y] == 7:  # Dungeon NPC
-                npc_list.append((x, y, "Dungeon Guardian"))
+                npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"])))
     
     return npc_list
 
@@ -104,10 +109,11 @@ def display_world(world, npcs):
     plt.colorbar(label="Terrain Type")
     plt.title("AI-Generated RPG World with NPCs")
     
-    # Mark NPC locations
+    # Mark NPC locations and display their dialogue
     for npc in npcs:
-        x, y, npc_type = npc
+        x, y, npc_type, dialogue = npc
         plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
+        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}'")
     
     plt.show()
 
