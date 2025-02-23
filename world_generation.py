@@ -12,7 +12,10 @@ terrain_types = {
     1: "grass",
     2: "forest",
     3: "mountain",
-    4: "desert"
+    4: "desert",
+    5: "village",
+    6: "ruins",
+    7: "dungeon"
 }
 
 # Generate structured biome placement using Perlin-like noise
@@ -37,6 +40,26 @@ def generate_world(size):
     
     return terrain_map
 
+# Add AI-generated points of interest (villages, ruins, dungeons)
+def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
+    size_x, size_y = world.shape
+    for _ in range(num_villages):
+        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+        if world[x, y] in [1, 2]:  # Villages appear on grass or forest
+            world[x, y] = 5
+    
+    for _ in range(num_ruins):
+        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+        if world[x, y] in [1, 2, 3]:  # Ruins appear on land
+            world[x, y] = 6
+    
+    for _ in range(num_dungeons):
+        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+        if world[x, y] in [2, 3]:  # Dungeons appear in forests or mountains
+            world[x, y] = 7
+    
+    return world
+
 # Function to display the world as a map
 def display_world(world):
     color_map = {
@@ -44,17 +67,21 @@ def display_world(world):
         1: "green",   # Grass
         2: "darkgreen",  # Forest
         3: "gray",    # Mountain
-        4: "yellow"   # Desert
+        4: "yellow",   # Desert
+        5: "brown",    # Village
+        6: "purple",   # Ruins
+        7: "black"     # Dungeon
     }
 
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World")
+    plt.title("AI-Generated RPG World with Landmarks")
     plt.show()
 
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
+world = add_landmarks(world)
 display_world(world)
 
 # Ensure the figure window appears
