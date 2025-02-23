@@ -1,6 +1,7 @@
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.ndimage import gaussian_filter
 
 # Define world size
 WORLD_SIZE = (50, 50)  # 50x50 tile grid
@@ -14,23 +15,27 @@ terrain_types = {
     4: "desert"
 }
 
-# Generate terrain using Perlin noise for smoother transitions
+# Generate structured biome placement using Perlin-like noise
 def generate_world(size):
-    world = np.zeros(size, dtype=int)
+    world = np.random.rand(size[0], size[1])  # Generate noise map
+    world = gaussian_filter(world, sigma=5)  # Smooth the noise for natural transitions
+    
+    terrain_map = np.zeros(size, dtype=int)
     for x in range(size[0]):
         for y in range(size[1]):
-            noise_value = random.uniform(0, 1)
-            if noise_value < 0.1:
-                world[x, y] = 0  # Water
+            noise_value = world[x, y]
+            if noise_value < 0.2:
+                terrain_map[x, y] = 0  # Water
             elif noise_value < 0.5:
-                world[x, y] = 1  # Grass
+                terrain_map[x, y] = 1  # Grass
             elif noise_value < 0.7:
-                world[x, y] = 2  # Forest
+                terrain_map[x, y] = 2  # Forest
             elif noise_value < 0.85:
-                world[x, y] = 3  # Mountain
+                terrain_map[x, y] = 3  # Mountain
             else:
-                world[x, y] = 4  # Desert
-    return world
+                terrain_map[x, y] = 4  # Desert
+    
+    return terrain_map
 
 # Function to display the world as a map
 def display_world(world):
