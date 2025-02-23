@@ -14,9 +14,22 @@ terrain_types = {
     4: "desert"
 }
 
-# Generate terrain using a weighted random choice for distribution
+# Generate terrain using Perlin noise for smoother transitions
 def generate_world(size):
-    world = np.random.choice(list(terrain_types.keys()), size=size, p=[0.1, 0.5, 0.2, 0.1, 0.1])
+    world = np.zeros(size, dtype=int)
+    for x in range(size[0]):
+        for y in range(size[1]):
+            noise_value = random.uniform(0, 1)
+            if noise_value < 0.1:
+                world[x, y] = 0  # Water
+            elif noise_value < 0.5:
+                world[x, y] = 1  # Grass
+            elif noise_value < 0.7:
+                world[x, y] = 2  # Forest
+            elif noise_value < 0.85:
+                world[x, y] = 3  # Mountain
+            else:
+                world[x, y] = 4  # Desert
     return world
 
 # Function to display the world as a map
@@ -36,7 +49,7 @@ def display_world(world):
     plt.show()
 
 # Generate and display the world
-world = generate_world(WORLD_SIZE)  # <- This should now be correctly defined
+world = generate_world(WORLD_SIZE)
 display_world(world)
 
 # Ensure the figure window appears
