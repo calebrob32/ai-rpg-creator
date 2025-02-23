@@ -70,10 +70,13 @@ def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
     
     return world
 
-# Add NPCs with basic quests
+# Add NPCs with quests and tracking
 def add_npcs(world):
     size_x, size_y = world.shape
     npc_list = []
+    active_quests = {}
+    completed_quests = {}
+    
     dialogues = {
         "Villager": ["Welcome to our village!", "Can you bring me some herbs?", "The fields are bountiful this season."],
         "Wanderer": ["These ruins hold many secrets...", "I seek a lost artifact, can you help?", "Beware of the dungeons ahead."],
@@ -81,24 +84,27 @@ def add_npcs(world):
     }
     
     quests = {
-        "Villager": "Gather 5 healing herbs",
-        "Wanderer": "Find an ancient artifact in the ruins",
-        "Dungeon Guardian": "Defeat the dungeon monster"
+        "Villager": {"task": "Gather 5 healing herbs", "reward": "10 gold"},
+        "Wanderer": {"task": "Find an ancient artifact in the ruins", "reward": "Mystical Scroll"},
+        "Dungeon Guardian": {"task": "Defeat the dungeon monster", "reward": "Legendary Sword"}
     }
     
     for x in range(size_x):
         for y in range(size_y):
             if world[x, y] == 5:  # Village NPC
                 npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"]), quests["Villager"]))
+                active_quests[(x, y)] = quests["Villager"]
             elif world[x, y] == 6:  # Ruins NPC
                 npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"]), quests["Wanderer"]))
+                active_quests[(x, y)] = quests["Wanderer"]
             elif world[x, y] == 7:  # Dungeon NPC
                 npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"]), quests["Dungeon Guardian"]))
+                active_quests[(x, y)] = quests["Dungeon Guardian"]
     
-    return npc_list
+    return npc_list, active_quests, completed_quests
 
 # Function to display the world as a map
-def display_world(world, npcs):
+def display_world(world, npcs, active_quests):
     color_map = {
         0: "blue",    # Water
         1: "green",   # Grass
@@ -113,21 +119,20 @@ def display_world(world, npcs):
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with NPC Quests")
+    plt.title("AI-Generated RPG World with Quest Tracking")
     
-    # Mark NPC locations and display their dialogue & quests
     for npc in npcs:
         x, y, npc_type, dialogue, quest = npc
         plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
-        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest}")
+        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest['task']} - Reward: {quest['reward']}")
     
     plt.show()
 
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
 world = add_landmarks(world)
-npcs = add_npcs(world)
-display_world(world, npcs)
+npcs, active_quests, completed_quests = add_npcs(world)
+display_world(world, npcs, active_quests)
 
 # Ensure the figure window appears
 plt.show()
