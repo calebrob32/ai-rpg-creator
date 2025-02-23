@@ -70,13 +70,14 @@ def generate_world_lore():
     ]
     return random.choice(world_lore)
 
-# Add NPCs with quests, tracking, and trading
+# Add NPCs with movement, quests, tracking, and trading
 def add_npcs(world):
     size_x, size_y = world.shape
     npc_list = []
     active_quests = {}
     completed_quests = {}
     npc_trading = {}
+    npc_positions = {}
     
     dialogues = {
         "Villager": ["Welcome to our village!", "Can you bring me some herbs?", "The fields are bountiful this season."],
@@ -98,29 +99,36 @@ def add_npcs(world):
     
     for x in range(size_x):
         for y in range(size_y):
-            if world[x, y] == 5:  # Village NPC
-                npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"]), quests["Villager"]))
-                active_quests[(x, y)] = quests["Villager"]
-                npc_trading[(x, y)] = trading_items["Villager"]
-            elif world[x, y] == 6:  # Ruins NPC
-                npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"]), quests["Wanderer"]))
-                active_quests[(x, y)] = quests["Wanderer"]
-                npc_trading[(x, y)] = trading_items["Wanderer"]
-            elif world[x, y] == 7:  # Dungeon NPC
-                npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"]), quests["Dungeon Guardian"]))
-                active_quests[(x, y)] = quests["Dungeon Guardian"]
-                npc_trading[(x, y)] = trading_items["Dungeon Guardian"]
+            if world[x, y] in [5, 6, 7]:
+                npc_type = "Villager" if world[x, y] == 5 else "Wanderer" if world[x, y] == 6 else "Dungeon Guardian"
+                npc_list.append((x, y, npc_type, random.choice(dialogues[npc_type]), quests[npc_type]))
+                active_quests[(x, y)] = quests[npc_type]
+                npc_trading[(x, y)] = trading_items[npc_type]
+                npc_positions[(x, y)] = (x, y)  # Initial NPC position
     
-    return npc_list, active_quests, completed_quests, npc_trading
+    return npc_list, active_quests, completed_quests, npc_trading, npc_positions
+
+# Move NPCs randomly within a limited area
+def move_npcs(npc_positions, world):
+    new_positions = {}
+    for (x, y), pos in npc_positions.items():
+        new_x, new_y = max(0, min(WORLD_SIZE[0]-1, x + random.choice([-1, 0, 1]))), max(0, min(WORLD_SIZE[1]-1, y + random.choice([-1, 0, 1])))
+        if world[new_x, new_y] not in [0]:  # Avoid water
+            new_positions[(new_x, new_y)] = pos
+        else:
+            new_positions[(x, y)] = pos  # Stay in place if water is ahead
+    return new_positions
 
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
 world = apply_world_events(world)
-npcs, active_quests, completed_quests, npc_trading = add_npcs(world)
+npcs, active_quests, completed_quests, npc_trading, npc_positions = add_npcs(world)
+npc_positions = move_npcs(npc_positions, world)
 lore = generate_world_lore()
 
 # Display lore and event in terminal
 print(f"📖 World Lore: {lore}")
+print(f"🚶 NPCs have moved: {npc_positions}")
 
 # Ensure the figure window appears
 plt.show()
