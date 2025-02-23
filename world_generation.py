@@ -70,8 +70,24 @@ def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
     
     return world
 
+# Add NPCs to villages, ruins, and dungeons
+def add_npcs(world):
+    size_x, size_y = world.shape
+    npc_list = []
+    
+    for x in range(size_x):
+        for y in range(size_y):
+            if world[x, y] == 5:  # Village NPC
+                npc_list.append((x, y, "Villager"))
+            elif world[x, y] == 6:  # Ruins NPC
+                npc_list.append((x, y, "Wanderer"))
+            elif world[x, y] == 7:  # Dungeon NPC
+                npc_list.append((x, y, "Dungeon Guardian"))
+    
+    return npc_list
+
 # Function to display the world as a map
-def display_world(world):
+def display_world(world, npcs):
     color_map = {
         0: "blue",    # Water
         1: "green",   # Grass
@@ -86,13 +102,20 @@ def display_world(world):
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with Improved Landmarks")
+    plt.title("AI-Generated RPG World with NPCs")
+    
+    # Mark NPC locations
+    for npc in npcs:
+        x, y, npc_type = npc
+        plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
+    
     plt.show()
 
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
 world = add_landmarks(world)
-display_world(world)
+npcs = add_npcs(world)
+display_world(world, npcs)
 
 # Ensure the figure window appears
 plt.show()
