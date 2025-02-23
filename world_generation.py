@@ -40,23 +40,33 @@ def generate_world(size):
     
     return terrain_map
 
-# Add AI-generated points of interest (villages, ruins, dungeons)
+# Add AI-generated points of interest (villages, ruins, dungeons) with better placement
 def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
     size_x, size_y = world.shape
+    
+    # Villages near water or grasslands
     for _ in range(num_villages):
-        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-        if world[x, y] in [1, 2]:  # Villages appear on grass or forest
-            world[x, y] = 5
+        while True:
+            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+            if world[x, y] in [1] and any(world[max(0, x-1):min(size_x, x+2), max(0, y-1):min(size_y, y+2)].flatten() == 0):
+                world[x, y] = 5
+                break
     
+    # Ruins scattered in deserts, forests, or mountains
     for _ in range(num_ruins):
-        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-        if world[x, y] in [1, 2, 3]:  # Ruins appear on land
-            world[x, y] = 6
+        while True:
+            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+            if world[x, y] in [2, 3, 4]:
+                world[x, y] = 6
+                break
     
+    # Dungeons deep in forests or mountains
     for _ in range(num_dungeons):
-        x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-        if world[x, y] in [2, 3]:  # Dungeons appear in forests or mountains
-            world[x, y] = 7
+        while True:
+            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
+            if world[x, y] in [2, 3] and all(world[max(0, x-1):min(size_x, x+2), max(0, y-1):min(size_y, y+2)].flatten() != 1):
+                world[x, y] = 7
+                break
     
     return world
 
@@ -76,7 +86,7 @@ def display_world(world):
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with Landmarks")
+    plt.title("AI-Generated RPG World with Improved Landmarks")
     plt.show()
 
 # Generate and display the world
