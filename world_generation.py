@@ -40,35 +40,35 @@ def generate_world(size):
     
     return terrain_map
 
-# Add AI-generated points of interest (villages, ruins, dungeons) with better placement
-def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
-    size_x, size_y = world.shape
+# Apply random world events
+def apply_world_events(world):
+    events = [
+        "A new ruin has been discovered in the mountains!",
+        "A village has expanded, adding more homes.",
+        "A rare comet passes by, bringing strange energy to the land.",
+        "Heavy storms have flooded part of the grasslands.",
+        "A mysterious traveler arrives, sharing secrets of the past."
+    ]
     
-    # Villages near water or grasslands
-    for _ in range(num_villages):
-        while True:
-            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-            if world[x, y] in [1] and any(world[max(0, x-1):min(size_x, x+2), max(0, y-1):min(size_y, y+2)].flatten() == 0):
-                world[x, y] = 5
-                break
-    
-    # Ruins scattered in deserts, forests, or mountains
-    for _ in range(num_ruins):
-        while True:
-            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-            if world[x, y] in [2, 3, 4]:
-                world[x, y] = 6
-                break
-    
-    # Dungeons deep in forests or mountains
-    for _ in range(num_dungeons):
-        while True:
-            x, y = random.randint(0, size_x - 1), random.randint(0, size_y - 1)
-            if world[x, y] in [2, 3] and all(world[max(0, x-1):min(size_x, x+2), max(0, y-1):min(size_y, y+2)].flatten() != 1):
-                world[x, y] = 7
-                break
+    event = random.choice(events)  # Pick a random event
+    print(f"🌍 World Event: {event}")  # Display event in terminal
+
+    if "ruin" in event:
+        x, y = random.randint(0, WORLD_SIZE[0]-1), random.randint(0, WORLD_SIZE[1]-1)
+        world[x, y] = 6  # Add a new ruin
     
     return world
+
+# Add AI-generated world lore
+def generate_world_lore():
+    world_lore = [
+        "Legends speak of an ancient war that shaped this land...",
+        "Many say a hidden artifact lies beneath the shifting sands of the desert.",
+        "The villagers believe the mountains hold the key to an age-old prophecy.",
+        "A forbidden spellbook was once buried in the ruins, waiting to be found.",
+        "The forests whisper stories of a lost kingdom, hidden from time."
+    ]
+    return random.choice(world_lore)
 
 # Add NPCs with quests, tracking, and trading
 def add_npcs(world):
@@ -113,36 +113,14 @@ def add_npcs(world):
     
     return npc_list, active_quests, completed_quests, npc_trading
 
-# Function to display the world as a map
-def display_world(world, npcs, active_quests, npc_trading):
-    color_map = {
-        0: "blue",    # Water
-        1: "green",   # Grass
-        2: "darkgreen",  # Forest
-        3: "gray",    # Mountain
-        4: "yellow",   # Desert
-        5: "brown",    # Village
-        6: "purple",   # Ruins
-        7: "black"     # Dungeon
-    }
-
-    plt.figure(figsize=(10,10))
-    plt.imshow(world, cmap='terrain', interpolation='nearest')
-    plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with Trading System")
-    
-    for npc in npcs:
-        x, y, npc_type, dialogue, quest = npc
-        plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
-        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest['task']} - Reward: {quest['reward']} - Trade: {npc_trading[(x, y)]['item']} for {npc_trading[(x, y)]['price']} gold")
-    
-    plt.show()
-
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
-world = add_landmarks(world)
+world = apply_world_events(world)
 npcs, active_quests, completed_quests, npc_trading = add_npcs(world)
-display_world(world, npcs, active_quests, npc_trading)
+lore = generate_world_lore()
+
+# Display lore and event in terminal
+print(f"📖 World Lore: {lore}")
 
 # Ensure the figure window appears
 plt.show()
