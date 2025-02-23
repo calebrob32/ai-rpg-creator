@@ -70,12 +70,13 @@ def add_landmarks(world, num_villages=3, num_ruins=2, num_dungeons=2):
     
     return world
 
-# Add NPCs with quests and tracking
+# Add NPCs with quests, tracking, and trading
 def add_npcs(world):
     size_x, size_y = world.shape
     npc_list = []
     active_quests = {}
     completed_quests = {}
+    npc_trading = {}
     
     dialogues = {
         "Villager": ["Welcome to our village!", "Can you bring me some herbs?", "The fields are bountiful this season."],
@@ -89,22 +90,31 @@ def add_npcs(world):
         "Dungeon Guardian": {"task": "Defeat the dungeon monster", "reward": "Legendary Sword"}
     }
     
+    trading_items = {
+        "Villager": {"item": "Healing Potion", "price": 5},
+        "Wanderer": {"item": "Ancient Map", "price": 15},
+        "Dungeon Guardian": {"item": "Enchanted Armor", "price": 50}
+    }
+    
     for x in range(size_x):
         for y in range(size_y):
             if world[x, y] == 5:  # Village NPC
                 npc_list.append((x, y, "Villager", random.choice(dialogues["Villager"]), quests["Villager"]))
                 active_quests[(x, y)] = quests["Villager"]
+                npc_trading[(x, y)] = trading_items["Villager"]
             elif world[x, y] == 6:  # Ruins NPC
                 npc_list.append((x, y, "Wanderer", random.choice(dialogues["Wanderer"]), quests["Wanderer"]))
                 active_quests[(x, y)] = quests["Wanderer"]
+                npc_trading[(x, y)] = trading_items["Wanderer"]
             elif world[x, y] == 7:  # Dungeon NPC
                 npc_list.append((x, y, "Dungeon Guardian", random.choice(dialogues["Dungeon Guardian"]), quests["Dungeon Guardian"]))
                 active_quests[(x, y)] = quests["Dungeon Guardian"]
+                npc_trading[(x, y)] = trading_items["Dungeon Guardian"]
     
-    return npc_list, active_quests, completed_quests
+    return npc_list, active_quests, completed_quests, npc_trading
 
 # Function to display the world as a map
-def display_world(world, npcs, active_quests):
+def display_world(world, npcs, active_quests, npc_trading):
     color_map = {
         0: "blue",    # Water
         1: "green",   # Grass
@@ -119,20 +129,20 @@ def display_world(world, npcs, active_quests):
     plt.figure(figsize=(10,10))
     plt.imshow(world, cmap='terrain', interpolation='nearest')
     plt.colorbar(label="Terrain Type")
-    plt.title("AI-Generated RPG World with Quest Tracking")
+    plt.title("AI-Generated RPG World with Trading System")
     
     for npc in npcs:
         x, y, npc_type, dialogue, quest = npc
         plt.text(y, x, 'X', color='red', fontsize=12, ha='center', va='center')
-        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest['task']} - Reward: {quest['reward']}")
+        print(f"NPC at ({x}, {y}): {npc_type} says: '{dialogue}' - Quest: {quest['task']} - Reward: {quest['reward']} - Trade: {npc_trading[(x, y)]['item']} for {npc_trading[(x, y)]['price']} gold")
     
     plt.show()
 
 # Generate and display the world
 world = generate_world(WORLD_SIZE)
 world = add_landmarks(world)
-npcs, active_quests, completed_quests = add_npcs(world)
-display_world(world, npcs, active_quests)
+npcs, active_quests, completed_quests, npc_trading = add_npcs(world)
+display_world(world, npcs, active_quests, npc_trading)
 
 # Ensure the figure window appears
 plt.show()
